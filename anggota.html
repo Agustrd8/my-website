@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PK IMM H. AGUS SALIM</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="hero small">
+    <div class="overlay"></div>
+    <div class="hero-content">
+      <h1>Daftar Anggota</h1>
+      <nav>
+        <a href="index.html">Beranda</a>
+        <a href="anggota.html" class="active">Anggota</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="members">
+      <h2>Anggota Aktif PK IMM H. AGUS SALIM</h2>
+      <div id="member-list" class="member-grid">
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h2>Tambah Anggota Baru</h2>
+      <form id="add-member-form">
+        <input type="text" id="member-name" placeholder="Nama Lengkap" required>
+        <input type="password" id="member-code" placeholder="Kode Keanggotaan" required>
+        <button type="submit">Daftar</button>
+      </form>
+      <p id="message"></p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 PK IMM H. AGUS SALIM. Semua Hak Cipta Dilindungi.</p>
+  </footer>
+
+  <script>
+    const ADMIN_CODE = "ORG2025";
+
+    const ADMIN_DELETE_CODE = "HAPUS2025";
+
+    let members = JSON.parse(localStorage.getItem("members")) || [
+      "Agus Tiranda",
+      "Budi Santoso",
+      "Citra Lestari",
+      "Dewi Anggraini",
+      "Eko Prasetyo"
+    ];
+
+    function renderMembers() {
+      const memberList = document.getElementById("member-list");
+      memberList.innerHTML = "";
+      members.forEach((member, index) => {
+        const div = document.createElement("div");
+        div.className = "member-card";
+
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = member;
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "❌";
+        deleteBtn.className = "delete-btn";
+        deleteBtn.onclick = () => {
+          const inputCode = prompt("Masukkan kode rahasia admin untuk menghapus anggota:");
+          if (inputCode === ADMIN_DELETE_CODE) {
+            if (confirm(`Yakin ingin menghapus ${member}?`)) {
+              members.splice(index, 1); // hapus dari array
+              localStorage.setItem("members", JSON.stringify(members)); // update localStorage
+              renderMembers(); // render ulang
+              alert("✅ Anggota berhasil dihapus!");
+            }
+          } else {
+            alert("❌ Kode rahasia salah! Anda tidak berhak menghapus anggota.");
+          }
+        };
+
+        div.appendChild(nameSpan);
+        div.appendChild(deleteBtn);
+        memberList.appendChild(div);
+      });
+    }
+
+    document.getElementById("add-member-form").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const name = document.getElementById("member-name").value.trim();
+      const code = document.getElementById("member-code").value.trim();
+      const message = document.getElementById("message");
+
+      if (code !== ADMIN_CODE) {
+        message.textContent = "❌ Kode keanggotaan salah!";
+        message.style.color = "red";
+        return;
+      }
+
+      if (name && !members.includes(name)) {
+        members.push(name);
+        localStorage.setItem("members", JSON.stringify(members));
+        renderMembers();
+        message.textContent = "✅ Anggota berhasil ditambahkan!";
+        message.style.color = "green";
+        document.getElementById("add-member-form").reset();
+      } else {
+        message.textContent = "⚠️ Nama kosong atau sudah ada.";
+        message.style.color = "orange";
+      }
+    });
+
+    renderMembers();
+  </script>
+</body>
+</html>
