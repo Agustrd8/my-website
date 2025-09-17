@@ -16,7 +16,7 @@ body {
 .hero {
   position: relative;
   height: 60vh;
-  background: url('imm1.jpg') no-repeat center center/cover;
+  background: url('logo pk imm.png') no-repeat center center/cover;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -197,4 +197,5 @@ footer {
   font-size: 0.9rem;
   margin-top: 40px;
 }
+
 
