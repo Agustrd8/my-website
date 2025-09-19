@@ -29,9 +29,9 @@
     <section class="form-section">
       <h2>Tambah Anggota Baru</h2>
       <form id="memberForm">
-        <input type="text" id="nama" name="nama" placeholder="Nama Lengkap" required>
-        <input type="email" id="email" name="email" placeholder="Email" required>
-        <input type="password" id="kode" name="kode" placeholder="Kode Keanggotaan" required>
+        <input type="text" id="nama" placeholder="Nama Lengkap" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="kode" placeholder="Kode Keanggotaan" required>
         <button type="submit">Daftar</button>
       </form>
       <p id="statusMessage"></p>
@@ -40,8 +40,8 @@
     <section class="form-section admin-section">
       <h2>Hapus Anggota (Admin)</h2>
       <form id="deleteForm">
-        <input type="text" id="delete-nama" name="delete-nama" placeholder="Nama Anggota" required>
-        <input type="password" id="delete-secret" name="delete-secret" placeholder="Kode Rahasia Admin" required>
+        <input type="text" id="delete-nama" placeholder="Nama Anggota" required>
+        <input type="password" id="delete-secret" placeholder="Kode Rahasia Admin" required>
         <button type="submit" style="background-color: red; color: white;">Hapus Anggota</button>
       </form>
       <p id="deleteMessage"></p>
@@ -56,12 +56,12 @@
     const scriptURL = "https://script.google.com/macros/s/AKfycbwsJ_XnYzLLK8BXnlax4G0l20Mc6TmNkp4Pgr2u-pIHwUdb75y0fDOUOjUB1TMhmYpItg/exec";
 
     function loadMembers() {
-      fetch(scriptURL + "?action=read")
+      fetch(scriptURL)
         .then(res => res.json())
         .then(data => {
           const memberList = document.getElementById("member-list");
           memberList.innerHTML = "";
-          if (!data || data.length === 0) {
+          if (data.length === 0) {
             memberList.innerHTML = "<p>Belum ada anggota.</p>";
           } else {
             data.forEach(member => {
@@ -79,40 +79,56 @@
 
     document.getElementById("memberForm").addEventListener("submit", function(e) {
       e.preventDefault();
-      const formData = new FormData(this);
-      formData.append("action", "create");
+      const nama = document.getElementById("nama").value;
+      const email = document.getElementById("email").value;
+      const kode = document.getElementById("kode").value;
 
-      fetch(scriptURL, { method: "POST", body: formData })
-        .then(res => res.json())
-        .then(data => {
-          document.getElementById("statusMessage").textContent = data.message;
-          document.getElementById("statusMessage").style.color = data.success ? "green" : "red";
-          this.reset();
-          loadMembers();
+      fetch(scriptURL, {
+        method: "POST",
+        body: new URLSearchParams({
+          action: "create",
+          nama: nama,
+          email: email,
+          kode: kode
         })
-        .catch(err => {
-          document.getElementById("statusMessage").textContent = "❌ Gagal menyimpan data.";
-          document.getElementById("statusMessage").style.color = "red";
-        });
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("statusMessage").textContent = data.message;
+        document.getElementById("statusMessage").style.color = data.message.includes("✅") ? "green" : "red";
+        document.getElementById("memberForm").reset();
+        loadMembers();
+      })
+      .catch(err => {
+        document.getElementById("statusMessage").textContent = "❌ Gagal menyimpan data.";
+        document.getElementById("statusMessage").style.color = "red";
+      });
     });
 
     document.getElementById("deleteForm").addEventListener("submit", function(e) {
       e.preventDefault();
-      const formData = new FormData(this);
-      formData.append("action", "delete");
+      const nama = document.getElementById("delete-nama").value;
+      const secret = document.getElementById("delete-secret").value;
 
-      fetch(scriptURL, { method: "POST", body: formData })
-        .then(res => res.json())
-        .then(data => {
-          document.getElementById("deleteMessage").textContent = data.message;
-          document.getElementById("deleteMessage").style.color = data.success ? "green" : "red";
-          this.reset();
-          loadMembers();
+      fetch(scriptURL, {
+        method: "POST",
+        body: new URLSearchParams({
+          action: "delete",
+          nama: nama,
+          secret: secret
         })
-        .catch(err => {
-          document.getElementById("deleteMessage").textContent = "❌ Gagal menghapus anggota.";
-          document.getElementById("deleteMessage").style.color = "red";
-        });
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("deleteMessage").textContent = data.message;
+        document.getElementById("deleteMessage").style.color = data.message.includes("berhasil") ? "green" : "red";
+        document.getElementById("deleteForm").reset();
+        loadMembers();
+      })
+      .catch(err => {
+        document.getElementById("deleteMessage").textContent = "❌ Gagal menghapus anggota.";
+        document.getElementById("deleteMessage").style.color = "red";
+      });
     });
 
     loadMembers();
