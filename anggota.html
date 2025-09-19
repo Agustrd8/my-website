@@ -53,15 +53,18 @@
   </footer>
 
   <script>
+    
     const scriptURL = "https://script.google.com/macros/s/AKfycbwsJ_XnYzLLK8BXnlax4G0l20Mc6TmNkp4Pgr2u-pIHwUdb75y0fDOUOjUB1TMhmYpItg/exec";
 
+
     function loadMembers() {
-      fetch(scriptURL)
+      fetch(scriptURL + "?action=read")
         .then(res => res.json())
         .then(data => {
           const memberList = document.getElementById("member-list");
           memberList.innerHTML = "";
-          if (data.length === 0) {
+
+          if (!data || data.length === 0) {
             memberList.innerHTML = "<p>Belum ada anggota.</p>";
           } else {
             data.forEach(member => {
@@ -79,9 +82,15 @@
 
     document.getElementById("memberForm").addEventListener("submit", function(e) {
       e.preventDefault();
-      const nama = document.getElementById("nama").value;
-      const email = document.getElementById("email").value;
-      const kode = document.getElementById("kode").value;
+      const nama = document.getElementById("nama").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const kode = document.getElementById("kode").value.trim();
+
+      if (!nama || !email || !kode) {
+        document.getElementById("statusMessage").textContent = "⚠️ Semua field wajib diisi.";
+        document.getElementById("statusMessage").style.color = "red";
+        return;
+      }
 
       fetch(scriptURL, {
         method: "POST",
@@ -95,9 +104,11 @@
       .then(res => res.json())
       .then(data => {
         document.getElementById("statusMessage").textContent = data.message;
-        document.getElementById("statusMessage").style.color = data.message.includes("✅") ? "green" : "red";
-        document.getElementById("memberForm").reset();
-        loadMembers();
+        document.getElementById("statusMessage").style.color = data.success ? "green" : "red";
+        if (data.success) {
+          document.getElementById("memberForm").reset();
+          loadMembers();
+        }
       })
       .catch(err => {
         document.getElementById("statusMessage").textContent = "❌ Gagal menyimpan data.";
@@ -107,8 +118,14 @@
 
     document.getElementById("deleteForm").addEventListener("submit", function(e) {
       e.preventDefault();
-      const nama = document.getElementById("delete-nama").value;
-      const secret = document.getElementById("delete-secret").value;
+      const nama = document.getElementById("delete-nama").value.trim();
+      const secret = document.getElementById("delete-secret").value.trim();
+
+      if (!nama || !secret) {
+        document.getElementById("deleteMessage").textContent = "⚠️ Semua field wajib diisi.";
+        document.getElementById("deleteMessage").style.color = "red";
+        return;
+      }
 
       fetch(scriptURL, {
         method: "POST",
@@ -121,9 +138,11 @@
       .then(res => res.json())
       .then(data => {
         document.getElementById("deleteMessage").textContent = data.message;
-        document.getElementById("deleteMessage").style.color = data.message.includes("berhasil") ? "green" : "red";
-        document.getElementById("deleteForm").reset();
-        loadMembers();
+        document.getElementById("deleteMessage").style.color = data.success ? "green" : "red";
+        if (data.success) {
+          document.getElementById("deleteForm").reset();
+          loadMembers();
+        }
       })
       .catch(err => {
         document.getElementById("deleteMessage").textContent = "❌ Gagal menghapus anggota.";
@@ -131,6 +150,7 @@
       });
     });
 
+    // Pertama kali load daftar
     loadMembers();
   </script>
 </body>
